@@ -1,0 +1,20 @@
+								Belhocine; Spring
+
+Task 5: 
+
+Match (: Actor {name: "Tom Hanks"}) - [:ACTED_IN] -> (:Movie) <- [:ACTED_IN] - (a:Actor) 
+WHERE (a:Actor) - [:ACTED_IN] -> (:Movie) <- [:ACTED_IN] - (:Actor {name: "Tom Cruise"})
+RETURN a.name AS introducedByActor;
+
+
+╒═════════════════════════╕
+│"introducedByActor"      │
+╞═════════════════════════╡
+│" Philip Seymour Hoffman"│
+├─────────────────────────┤
+│" Bill Paxton"           │
+├─────────────────────────┤
+│" Kevin Bacon"           │
+├─────────────────────────┤
+│" Craig T. Nelson"       │
+└─────────────────────────┘

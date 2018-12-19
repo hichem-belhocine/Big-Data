@@ -1,0 +1,40 @@
+								Belhocine; Spring
+
+Big Data Infrastructure, Homework 4
+
+Task 1: 
+
+a)
+
+CREATE (:User {name: "Dumbledore"});
+
+MATCH (m:Movie), (u:User)
+WHERE m.title = "Harry Potter and the Deathly Hallows: Part 2"
+     AND u.name = "Dumbledore"
+CREATE (u)-[r:RATED {rating: 5.2}]->(m)
+RETURN u.name AS username, m.title AS movie, r.rating AS rating;
+
+╒════════════╤══════════════════════════════════════════════╤════════╕
+│"username"  │"movie"                                       │"rating"│
+╞════════════╪══════════════════════════════════════════════╪════════╡
+│"Dumbledore"│"Harry Potter and the Deathly Hallows: Part 2"│5.2     │
+└────────────┴──────────────────────────────────────────────┴────────┘
+
+
+b) 
+MATCH (u:User {name: "Dumbledore"})-[r:RATED]->(m:Movie {title: "Harry Potter and the Deathly Hallows: Part 2"}) 
+SET r.rating = 5.6 
+RETURN u.name AS name, m.title AS movie, r.rating AS rating;
+
+╒════════════╤══════════════════════════════════════════════╤════════╕
+│"name"      │"movie"                                       │"rating"│
+╞════════════╪══════════════════════════════════════════════╪════════╡
+│"Dumbledore"│"Harry Potter and the Deathly Hallows: Part 2"│5.6     │
+└────────────┴──────────────────────────────────────────────┴────────┘
+
+
+c)
+MATCH (:User {name: "Dumbledore"})-[r:RATED]->(:Movie {title: "Harry Potter and the Deathly Hallows: Part 2"}) 
+DELETE r;
+
+> Deleted 1 relationship, completed after 1 ms.

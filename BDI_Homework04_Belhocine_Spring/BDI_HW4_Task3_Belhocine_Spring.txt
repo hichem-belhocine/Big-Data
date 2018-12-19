@@ -1,0 +1,12 @@
+								Belhocine; Spring
+
+Task 3: 
+
+MATCH (d:Director {name: "James Cameron"}) - [:DIRECTED] -> (m:Movie {title: "Titanic"}) <- [r:RATED] - (:User) 
+RETURN m.title AS movie, d.name AS director, avg(r.rating) AS AvgRating;
+
+╒═════════╤═══════════════╤══════════════════╕
+│"movie"  │"director"     │"AvgRating"       │
+╞═════════╪═══════════════╪══════════════════╡
+│"Titanic"│"James Cameron"│3.3323170731707323│
+└─────────┴───────────────┴──────────────────┘

@@ -1,0 +1,90 @@
+-- I omitted the coding part as it varies depending on the programming language you select.
+-- feel free to contact me if you have issues connecting to the database.
+
+CREATE TABLE paper (
+	paperID SERIAL PRIMARY KEY, -- special type for auto increments in PostgreSQL
+	title VARCHAR(255) NOT NULL,
+	abstract TEXT NOT NULL
+);
+
+
+CREATE TABLE author(
+	authorID SERIAL PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	affiliation VARCHAR(255) NOT NULL,
+	UNIQUE(email)
+);
+
+
+CREATE TABLE conference(
+	confID SERIAL PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	ranking INT NOT NULL
+);
+
+
+-- We suggest to use a "RESTRICT" action for all foreign keys for both updates and deletions: 
+-- we do not want to allow a removal of a paper or an author entry 
+-- if it is referenced in writes, submits or cites, which could lead to 
+-- incomplete/inconsistent information in the referring tables.
+
+CREATE TABLE writes(
+	authorID INT REFERENCES author(authorID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	paperID INT REFERENCES paper(paperID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	PRIMARY KEY (authorID, paperID)
+);
+
+
+CREATE TABLE submits(
+	paperID INTEGER REFERENCES paper(paperID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	confID  INTEGER REFERENCES conference(confID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	isAccepted BOOLEAN NOT NULL,
+	date DATE NOT NULL,
+	PRIMARY KEY (paperID,confID)
+);
+
+
+CREATE TABLE cites(
+	paperIDfrom INTEGER REFERENCES paper(paperID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	paperIDto INTEGER REFERENCES paper(paperID) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	PRIMARY KEY (paperIDfrom,paperIDto)
+);
+
+
+-- i. (warm up) Select the number of authors belonging to each affiliation. 
+SELECT affiliation, count(*)
+FROM Author
+GROUP BY affiliation;
+
+
+-- ii. Choose an authorID from Author and select all the abstracts of the papers written (or co-written) by the author with the selected authorID.
+SELECT abstract 
+FROM Paper NATURAL JOIN Writes 
+WHERE Writes.AuthorID = [selected authorID];
+
+
+-- iii. Create a view PublishesIn(authorID, confID) containing, all the pairs (authorID, confID) such that there is at least one publication by authorID accepted at confID.
+CREATE VIEW PublishesIn(authorID, confID) AS
+SELECT DISTINCT authorID, confID
+FROM Submits NATURAL JOIN Writes
+WHERE isAccepted = 1;
+
+
+-- iv. Select the IDs of all the authors that cited themselves.
+SELECT DISTINCT authorID
+FROM Writes w JOIN Cites ON w.paperID = Cites.paperIDfrom
+JOIN Writes AS w1 ON paperIDto = w1.paperID
+WHERE paperIDfrom <> paperIDto  -- just to be sure... 
+AND w.authorID = w1.authorID;
+
+
+-- v. Select the title of all the papers co-authored by the author selected in a. (the papers written only by the selected authors do not have to be part of the result).
+SELECT title 
+FROM Paper NATURAL JOIN Writes AS j
+WHERE Writes.AuthorID = [selected authorID]
+AND EXISTS (SELECT * 
+FROM Writes 
+WHERE paperID = j.paperID
+AND authorID <> j.authorID );
+
